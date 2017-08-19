@@ -899,11 +899,16 @@ public class JsonReader implements Closeable {
     } else if (p == PEEKED_UNQUOTED) {
       peekedString = nextUnquotedValue();
     } else if (p != PEEKED_BUFFERED) {
-      throw new IllegalStateException("Expected a double but was " + peek() + locationString());
+      peekedString = "0";
     }
 
     peeked = PEEKED_BUFFERED;
-    double result = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
+    double result;
+    try{
+        result = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
+    }catch (NumberFormatException e){
+        result = 0;
+    }
     if (!lenient && (Double.isNaN(result) || Double.isInfinite(result))) {
       throw new MalformedJsonException(
           "JSON forbids NaN and infinities: " + result + locationString());
