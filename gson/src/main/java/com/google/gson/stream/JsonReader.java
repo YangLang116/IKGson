@@ -950,23 +950,17 @@ public class JsonReader implements Closeable {
       } else {
         peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
       }
-      try {
-        long result = Long.parseLong(peekedString);
-        peeked = PEEKED_NONE;
-        pathIndices[stackSize - 1]++;
-        return result;
-      } catch (NumberFormatException ignored) {
-        // Fall back to parse as a double below.
-      }
     } else {
-      throw new IllegalStateException("Expected a long but was " + peek() + locationString());
+      peekedString = "0";
     }
 
     peeked = PEEKED_BUFFERED;
-    double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
-    long result = (long) asDouble;
-    if (result != asDouble) { // Make sure no precision was lost casting to 'long'.
-      throw new NumberFormatException("Expected a long but was " + peekedString + locationString());
+    long result;
+    try{
+      double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
+      result = (long) asDouble;
+    }catch (NumberFormatException e){
+      result = 0;
     }
     peekedString = null;
     peeked = PEEKED_NONE;
