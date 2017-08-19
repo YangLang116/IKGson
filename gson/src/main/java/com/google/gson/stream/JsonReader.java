@@ -822,7 +822,7 @@ public class JsonReader implements Closeable {
       result = new String(buffer, pos, peekedNumberLength);
       pos += peekedNumberLength;
     } else {
-      throw new IllegalStateException("Expected a string but was " + peek() + locationString());
+      return "";
     }
     peeked = PEEKED_NONE;
     pathIndices[stackSize - 1]++;
