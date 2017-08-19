@@ -841,16 +841,13 @@ public class JsonReader implements Closeable {
     if (p == PEEKED_NONE) {
       p = doPeek();
     }
+    peeked = PEEKED_NONE;
+    pathIndices[stackSize - 1]++;
     if (p == PEEKED_TRUE) {
-      peeked = PEEKED_NONE;
-      pathIndices[stackSize - 1]++;
       return true;
-    } else if (p == PEEKED_FALSE) {
-      peeked = PEEKED_NONE;
-      pathIndices[stackSize - 1]++;
+    } else {
       return false;
     }
-    throw new IllegalStateException("Expected a boolean but was " + peek() + locationString());
   }
 
   /**
@@ -1086,7 +1083,7 @@ public class JsonReader implements Closeable {
         break;
       }
     }
-   
+
     String result = (null == builder) ? new String(buffer, pos, i) : builder.append(buffer, pos, i).toString();
     pos += i;
     return result;
@@ -1552,7 +1549,7 @@ public class JsonReader implements Closeable {
     case '\'':
     case '"':
     case '\\':
-    case '/':	
+    case '/':
     	return escaped;
     default:
     	// throw error when none of the above cases are matched
