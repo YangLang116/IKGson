@@ -1170,9 +1170,6 @@ public class JsonReader implements Closeable {
     int result;
     if (p == PEEKED_LONG) {
       result = (int) peekedLong;
-      if (peekedLong != result) { // Make sure no precision was lost casting to 'int'.
-        throw new NumberFormatException("Expected an int but was " + peekedLong + locationString());
-      }
       peeked = PEEKED_NONE;
       pathIndices[stackSize - 1]++;
       return result;
@@ -1187,23 +1184,16 @@ public class JsonReader implements Closeable {
       } else {
         peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
       }
-      try {
-        result = Integer.parseInt(peekedString);
-        peeked = PEEKED_NONE;
-        pathIndices[stackSize - 1]++;
-        return result;
-      } catch (NumberFormatException ignored) {
-        // Fall back to parse as a double below.
-      }
     } else {
-      throw new IllegalStateException("Expected an int but was " + peek() + locationString());
+      peekedString = "0";
     }
 
     peeked = PEEKED_BUFFERED;
-    double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
-    result = (int) asDouble;
-    if (result != asDouble) { // Make sure no precision was lost casting to 'int'.
-      throw new NumberFormatException("Expected an int but was " + peekedString + locationString());
+    try{
+      double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
+      result = (int) asDouble;
+    }catch (NumberFormatException e){
+      result = 0;
     }
     peekedString = null;
     peeked = PEEKED_NONE;
