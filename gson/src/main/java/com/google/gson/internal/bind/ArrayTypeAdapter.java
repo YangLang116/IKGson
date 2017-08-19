@@ -65,14 +65,17 @@ public final class ArrayTypeAdapter<E> extends TypeAdapter<Object> {
       in.nextNull();
       return null;
     }
-
     List<E> list = new ArrayList<E>();
-    in.beginArray();
-    while (in.hasNext()) {
-      E instance = componentTypeAdapter.read(in);
-      list.add(instance);
+    try{
+        in.beginArray();
+        while (in.hasNext()) {
+          E instance = componentTypeAdapter.read(in);
+          list.add(instance);
+        }
+        in.endArray();
+    } catch (IllegalStateException e){
+        in.skipValue();
     }
-    in.endArray();
 
     int size = list.size();
     Object array = Array.newInstance(componentType, size);
