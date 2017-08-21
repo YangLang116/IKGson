@@ -821,6 +821,8 @@ public class JsonReader implements Closeable {
     } else if (p == PEEKED_NUMBER) {
       result = new String(buffer, pos, peekedNumberLength);
       pos += peekedNumberLength;
+    } else if(p == PEEKED_NULL) {
+      result = null;
     } else {
       skipValue();
       return "";
