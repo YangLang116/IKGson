@@ -372,9 +372,6 @@ public final class TypeAdapters {
         return null;
       }
       String str = in.nextString();
-      if (str.length() != 1) {
-        throw new JsonSyntaxException("Expecting character, got: " + str);
-      }
       return str.charAt(0);
     }
     @Override
