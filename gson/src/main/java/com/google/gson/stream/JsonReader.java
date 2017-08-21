@@ -822,6 +822,7 @@ public class JsonReader implements Closeable {
       result = new String(buffer, pos, peekedNumberLength);
       pos += peekedNumberLength;
     } else {
+      skipValue();
       return "";
     }
     peeked = PEEKED_NONE;
@@ -845,9 +846,11 @@ public class JsonReader implements Closeable {
     pathIndices[stackSize - 1]++;
     if (p == PEEKED_TRUE) {
       return true;
-    } else {
+    } else if (p == PEEKED_FALSE) {
       return false;
     }
+    skipValue();
+    return false;
   }
 
   /**
@@ -899,6 +902,7 @@ public class JsonReader implements Closeable {
     } else if (p == PEEKED_UNQUOTED) {
       peekedString = nextUnquotedValue();
     } else if (p != PEEKED_BUFFERED) {
+      skipValue();
       peekedString = "0";
     }
 
@@ -951,6 +955,7 @@ public class JsonReader implements Closeable {
         peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
       }
     } else {
+      skipValue();
       peekedString = "0";
     }
 
@@ -1179,6 +1184,7 @@ public class JsonReader implements Closeable {
         peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
       }
     } else {
+      skipValue();
       peekedString = "0";
     }
 
