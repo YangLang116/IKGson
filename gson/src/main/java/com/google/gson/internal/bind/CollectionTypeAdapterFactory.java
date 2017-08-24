@@ -85,6 +85,9 @@ public final class CollectionTypeAdapterFactory implements TypeAdapterFactory {
         }
         in.endArray();
       }catch (IllegalStateException e){
+        if(Gson.StrictMode){
+          throw e;
+        }
         in.skipValue();
       }
       return collection;

@@ -16,6 +16,7 @@
 
 package com.google.gson.stream;
 
+import com.google.gson.Gson;
 import com.google.gson.internal.JsonReaderInternalAccess;
 import com.google.gson.internal.bind.JsonTreeReader;
 import java.io.Closeable;
@@ -228,6 +229,8 @@ public class JsonReader implements Closeable {
 
   /** True to accept non-spec compliant JSON */
   private boolean lenient = false;
+
+  private boolean StrictMode = Gson.StrictMode;
 
   /**
    * Use a manual buffer to easily read and unread upcoming characters, and
@@ -824,6 +827,9 @@ public class JsonReader implements Closeable {
     } else if(p == PEEKED_NULL) {
       result = null;
     } else {
+      if(StrictMode){
+        throw new IllegalStateException("Expected a string but was " + peek() + locationString());
+      }
       skipValue();
       return "";
     }
@@ -844,13 +850,20 @@ public class JsonReader implements Closeable {
     if (p == PEEKED_NONE) {
       p = doPeek();
     }
-    peeked = PEEKED_NONE;
-    pathIndices[stackSize - 1]++;
     if (p == PEEKED_TRUE) {
+      peeked = PEEKED_NONE;
+      pathIndices[stackSize - 1]++;
       return true;
     } else if (p == PEEKED_FALSE) {
+      peeked = PEEKED_NONE;
+      pathIndices[stackSize - 1]++;
       return false;
     }
+    if(StrictMode){
+      new IllegalStateException("Expected a boolean but was " + peek() + locationString());
+    }
+    peeked = PEEKED_NONE;
+    pathIndices[stackSize - 1]++;
     skipValue();
     return false;
   }
@@ -904,6 +917,9 @@ public class JsonReader implements Closeable {
     } else if (p == PEEKED_UNQUOTED) {
       peekedString = nextUnquotedValue();
     } else if (p != PEEKED_BUFFERED) {
+      if(StrictMode){
+        throw new IllegalStateException("Expected a double but was " + peek() + locationString());
+      }
       skipValue();
       peekedString = "0";
     }
@@ -913,7 +929,10 @@ public class JsonReader implements Closeable {
     try{
         result = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
     }catch (NumberFormatException e){
-        result = 0;
+        if(StrictMode){
+          throw e;
+        }
+      result = 0;
     }
     if (!lenient && (Double.isNaN(result) || Double.isInfinite(result))) {
       throw new MalformedJsonException(
@@ -956,18 +975,34 @@ public class JsonReader implements Closeable {
       } else {
         peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
       }
+      try {
+        long result = Long.parseLong(peekedString);
+        peeked = PEEKED_NONE;
+        pathIndices[stackSize - 1]++;
+        return result;
+      } catch (NumberFormatException ignored) {
+        // Fall back to parse as a double below.
+      }
     } else {
+      if(StrictMode){
+        throw new IllegalStateException("Expected a long but was " + peek() + locationString());
+      }
       skipValue();
       peekedString = "0";
     }
 
     peeked = PEEKED_BUFFERED;
-    long result;
+    long result = 0;
     try{
       double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
       result = (long) asDouble;
+      if (result != asDouble) { // Make sure no precision was lost casting to 'long'.
+        throw new NumberFormatException("Expected a long but was " + peekedString + locationString());
+      }
     }catch (NumberFormatException e){
-      result = 0;
+      if(StrictMode){
+        throw e;
+      }
     }
     peekedString = null;
     peeked = PEEKED_NONE;
@@ -1168,9 +1203,14 @@ public class JsonReader implements Closeable {
       p = doPeek();
     }
 
-    int result;
+    int result = 0;
     if (p == PEEKED_LONG) {
       result = (int) peekedLong;
+      if(StrictMode){
+        if (peekedLong != result) { // Make sure no precision was lost casting to 'int'.
+          throw new NumberFormatException("Expected an int but was " + peekedLong + locationString());
+        }
+      }
       peeked = PEEKED_NONE;
       pathIndices[stackSize - 1]++;
       return result;
@@ -1185,7 +1225,18 @@ public class JsonReader implements Closeable {
       } else {
         peekedString = nextQuotedValue(p == PEEKED_SINGLE_QUOTED ? '\'' : '"');
       }
+      try {
+        result = Integer.parseInt(peekedString);
+        peeked = PEEKED_NONE;
+        pathIndices[stackSize - 1]++;
+        return result;
+      } catch (NumberFormatException ignored) {
+        // Fall back to parse as a double below.
+      }
     } else {
+      if(StrictMode){
+        throw new IllegalStateException("Expected an int but was " + peek() + locationString());
+      }
       skipValue();
       peekedString = "0";
     }
@@ -1194,8 +1245,13 @@ public class JsonReader implements Closeable {
     try{
       double asDouble = Double.parseDouble(peekedString); // don't catch this NumberFormatException.
       result = (int) asDouble;
+      if (result != asDouble) { // Make sure no precision was lost casting to 'int'.
+        throw new NumberFormatException("Expected an int but was " + peekedString + locationString());
+      }
     }catch (NumberFormatException e){
-      result = 0;
+      if(StrictMode){
+        throw e;
+      }
     }
     peekedString = null;
     peeked = PEEKED_NONE;

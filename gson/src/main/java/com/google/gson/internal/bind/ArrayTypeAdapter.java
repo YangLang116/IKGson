@@ -74,6 +74,9 @@ public final class ArrayTypeAdapter<E> extends TypeAdapter<Object> {
         }
         in.endArray();
     } catch (IllegalStateException e){
+      if(Gson.StrictMode){
+        throw e;
+      }
         in.skipValue();
     }
 

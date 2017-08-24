@@ -136,6 +136,9 @@ public final class Gson {
   private final boolean lenient;
   private final JsonAdapterAnnotationTypeAdapterFactory jsonAdapterFactory;
 
+  // can open debug mode
+  public static boolean StrictMode = false;
+
   /**
    * Constructs a Gson object with default configuration. The default configuration has the
    * following settings:
