@@ -30,14 +30,12 @@ List(集合) | []  空集合，非null
 
 ---
 
-### 1. 测试的Json数据：
+### 3. 测试的Json数据：
 
 ```
-{
   "gifts":
-  [
   {
-    "name": "小黄瓜",
+    "name": "xxx",
     "gold":20,
     "cl":[1,2,3],
     "gid":154,
@@ -48,17 +46,13 @@ List(集合) | []  空集合，非null
     "boolean":true,
     "mchar":'c'
   }
-  ],
-  "error_msg":"操作成功",
-  "dm_error":0
-}
 ```
 
-### 2. JavaBean对象类
+### 4. JavaBean对象类
 
 ```
 /**
- * Created by YangLang on 2017/8/21.
+ * Created by xxx on 2017/8/21.
  */
 public class Gift {
 
@@ -75,35 +69,10 @@ public class Gift {
 }
 ```
 
-### 3. 规范的json数据
-```
-ServiceInfo{
-    gifts=[
-        Gift{
-            name='小黄瓜',
-            gold=20,
-            cl=[
-                1,
-                2,
-                3
-            ],
-            gid=154,
-            c=100,
-            mshort=45,
-            mfloat=15.0,
-            mdouble=1.0,
-            mboolean=false,
-            mchar=c
-        }
-    ],
-    error_msg='操作成功',
-    dm_error=0
-}
-```
 
 ---
 
-### 4. 各类型异常数据测试：
+### 5. 各类型异常数据测试：
 
 
 #### > 1. Byte类型的测试：
